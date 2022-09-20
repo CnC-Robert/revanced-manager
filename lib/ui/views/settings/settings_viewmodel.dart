@@ -29,6 +29,16 @@ class SettingsViewModel extends BaseViewModel {
   final TextEditingController _intSourceController = TextEditingController();
   final TextEditingController _apiUrlController = TextEditingController();
 
+  String selectedLanguageHint = 'English';
+  void setSelectedLanguageHint(String value) {
+    selectedLanguageHint = value;
+    notifyListeners();
+  }
+
+  String getSelectedLanguageHint() {
+    return selectedLanguageHint;
+  }
+
   void setLanguage(String language) {
     notifyListeners();
   }
@@ -41,6 +51,7 @@ class SettingsViewModel extends BaseViewModel {
     if (value != null) {
       await FlutterI18n.refresh(context, Locale(value));
       setLocaleMessages(value, EnMessages());
+      notifyListeners();
     }
   }
 
@@ -93,6 +104,27 @@ class SettingsViewModel extends BaseViewModel {
             groupValue: 'en',
             onChanged: (value) {
               updateLanguage(context, value);
+              setSelectedLanguageHint('settingsView.englishOption');
+              Navigator.of(context).pop();
+            },
+          ),
+          RadioListTile<String>(
+            title: I18nText('settingsView.russianOption'),
+            value: 'ru',
+            groupValue: 'en',
+            onChanged: (value) {
+              updateLanguage(context, value);
+              setSelectedLanguageHint('settingsView.russianOption');
+              Navigator.of(context).pop();
+            },
+          ),
+          RadioListTile<String>(
+            title: I18nText('settingsView.hindiOption'),
+            value: 'hi',
+            groupValue: 'en',
+            onChanged: (value) {
+              updateLanguage(context, value);
+              setSelectedLanguageHint('settingsView.hindiOption');
               Navigator.of(context).pop();
             },
           ),
