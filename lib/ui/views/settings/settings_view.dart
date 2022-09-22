@@ -92,7 +92,7 @@ class SettingsView extends StatelessWidget {
                   SettingsTileDialog(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     title: 'settingsView.languageLabel',
-                    subtitle: model.getSelectedLanguageHint(),
+                    subtitle: model.getSelectedLanguageHint(context),
                     onTap: () => model.showLanguagesDialog(context),
                   ),
                   _settingsDivider,

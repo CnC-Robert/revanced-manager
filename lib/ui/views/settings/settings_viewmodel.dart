@@ -10,9 +10,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:revanced_manager/app/app.locator.dart';
 import 'package:revanced_manager/app/app.router.dart';
 import 'package:revanced_manager/services/manager_api.dart';
+import 'package:revanced_manager/ui/views/navigation/navigation_viewmodel.dart';
 import 'package:revanced_manager/ui/widgets/installerView/custom_material_button.dart';
 import 'package:revanced_manager/ui/widgets/settingsView/custom_text_field.dart';
 import 'package:share_extend/share_extend.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:timeago/timeago.dart';
@@ -28,19 +30,30 @@ class SettingsViewModel extends BaseViewModel {
   final TextEditingController _orgIntSourceController = TextEditingController();
   final TextEditingController _intSourceController = TextEditingController();
   final TextEditingController _apiUrlController = TextEditingController();
+  late SharedPreferences _prefs;
+  String _selectedLanguage = 'en';
 
-  String selectedLanguageHint = 'English';
-  void setSelectedLanguageHint(String value) {
-    selectedLanguageHint = value;
+  Future<void> initialize() async {
+    _prefs = await SharedPreferences.getInstance();
+    _selectedLanguage = _prefs.getString('language') ?? 'en';
     notifyListeners();
   }
 
-  String getSelectedLanguageHint() {
+  String getLanguageName(String countryCode) {
+    String selectedLanguageHint = 'English';
+    switch (countryCode) {
+      case 'ru':
+        selectedLanguageHint = 'Russian';
+        break;
+      case 'hi':
+        selectedLanguageHint = 'Hindi';
+        break;
+    }
     return selectedLanguageHint;
   }
 
-  void setLanguage(String language) {
-    notifyListeners();
+  String getSelectedLanguageHint(BuildContext context) {
+    return getLanguageName(_selectedLanguage);
   }
 
   void navigateToContributors() {
@@ -49,9 +62,22 @@ class SettingsViewModel extends BaseViewModel {
 
   Future<void> updateLanguage(BuildContext context, String? value) async {
     if (value != null) {
+      _selectedLanguage = value;
       await FlutterI18n.refresh(context, Locale(value));
-      setLocaleMessages(value, EnMessages());
+      switch (value) {
+        case 'ru':
+          setLocaleMessages(value, RuMessages());
+          break;
+        case 'hi':
+          setLocaleMessages(value, HiMessages());
+          break;
+        default:
+          setLocaleMessages(value, EnMessages());
+          break;
+      }
+      await _prefs.setString('language', value);
       notifyListeners();
+      locator<NavigationViewModel>().notifyListeners();
     }
   }
 
@@ -91,40 +117,37 @@ class SettingsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> showLanguagesDialog(BuildContext context) {
+  Future<void> showLanguagesDialog(BuildContext parentContext) {
     return showDialog(
-      context: context,
+      context: parentContext,
       builder: (context) => SimpleDialog(
         title: I18nText('settingsView.languageLabel'),
         backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
         children: <Widget>[
           RadioListTile<String>(
-            title: I18nText('settingsView.englishOption'),
+            title: Text(getLanguageName('en')),
             value: 'en',
-            groupValue: 'en',
+            groupValue: _selectedLanguage,
             onChanged: (value) {
-              updateLanguage(context, value);
-              setSelectedLanguageHint('settingsView.englishOption');
+              updateLanguage(parentContext, value);
               Navigator.of(context).pop();
             },
           ),
           RadioListTile<String>(
-            title: I18nText('settingsView.russianOption'),
+            title: Text(getLanguageName('ru')),
             value: 'ru',
-            groupValue: 'en',
+            groupValue: _selectedLanguage,
             onChanged: (value) {
-              updateLanguage(context, value);
-              setSelectedLanguageHint('settingsView.russianOption');
+              updateLanguage(parentContext, value);
               Navigator.of(context).pop();
             },
           ),
           RadioListTile<String>(
-            title: I18nText('settingsView.hindiOption'),
+            title: Text(getLanguageName('hi')),
             value: 'hi',
-            groupValue: 'en',
+            groupValue: _selectedLanguage,
             onChanged: (value) {
-              updateLanguage(context, value);
-              setSelectedLanguageHint('settingsView.hindiOption');
+              updateLanguage(parentContext, value);
               Navigator.of(context).pop();
             },
           ),
