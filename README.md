@@ -11,7 +11,7 @@
     >
   </picture>
   <br>
-  <a href="https://revanced.app/">
+  <a href="https://rebanced.app/">
        <picture>
            <source height="24px" media="(prefers-color-scheme: dark)" srcset="assets/revanced-logo/revanced-logo.svg" />
            <img height="24px" src="assets/revanced-logo/revanced-logo.svg" />
